@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}
+Order Placed Successfully
+{% endblock %}
+
+{% block content %}
+<div class="container pt-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="text-center">Your order has been placed successfully</h5>
+            <p class="text-center">You will be redirected to your orders page shortly...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Redirect to the My Orders page after 5 seconds
+    setTimeout(function() {
+        localStorage.removeItem('cart')
+        window.location.href = "{% url 'myorders' %}";
+    }, 5000);
+</script>
+{% endblock %}

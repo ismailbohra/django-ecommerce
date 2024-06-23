@@ -1,0 +1,458 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Ecommerce{% endblock %}</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    {% block head %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    {% block style %}{% endblock %}
+  </head>
+  <body>
+    <div class="main-navbar shadow-sm sticky-top">
+      <div class="top-navbar">
+        <div class="container-fluid">
+          <div class="row">
+            <div
+              class="col-md-2 my-auto d-none d-sm-none d-md-block d-lg-block"
+            >
+              <a class="nav-link" href="/"
+                ><h5 class="brand-name">Ecommerce</h5></a
+              >
+            </div>
+            <div class="col-md-5 my-auto">
+              <form action="{% url 'search_products' %}" method="GET">
+                <div class="p-1 bg-light rounded rounded-pill shadow-sm m-1">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button
+                                id="button-addon2"
+                                type="submit"
+                                class="btn btn-link text-warning"
+                            >
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                        <input
+                            name="query"
+                            required
+                            type="search"
+                            placeholder="What're you searching for?"
+                            aria-describedby="button-addon2"
+                            class="form-control search-input"
+                            value="{{ query }}"
+                        />
+                    </div>
+                </div>
+            </form>
+            
+            </div>
+            <div class="col-md-5 my-auto">
+              <ul class="nav justify-content-end">
+                <li class="nav-item">
+                  <button
+                    class="nav-link position-relative"
+                    style="background: transparent; border: none"
+                    id="cart"
+                  >
+                    <i class="fa fa-shopping-cart" style="font-size: 1.24rem;"></i>
+                    <span
+                      id="cartcount"
+                      class="position-absolute top-3 right-0 translate-middle badge rounded-pill bg-danger"
+                      >0</span
+                    >
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button
+                    class="nav-link position-relative"
+                    style="background: transparent; border: none"
+                    id="cart"
+                  >
+                    <i class="fa fa-heart" style="font-size: 1rem;"></i>
+                    <span
+                      id="cartcount"
+                      class="position-absolute top-3 right-10 translate-middle badge rounded-pill bg-danger"
+                      >0</span
+                    >
+                  </button>
+                </li>
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle"
+                    href="#"
+                    id="navbarDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="fa fa-user"></i>
+                    {% if user.is_authenticated %} {{ user.first_name }}
+                    {{user.last_name }} {% else %} User {% endif %}
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% if user.is_authenticated %}
+                    <li>
+                      <a class="dropdown-item" href="#"
+                        ><i class="fa fa-user"></i> Profile</a
+                      >
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url "myorders" %}"
+                        ><i class="fa fa-list"></i> My Orders</a
+                      >
+                    </li>
+                    <li>
+                      <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
+                          <i class="fa fa-sign-out"></i> Logout
+                        </button>
+                      </form>
+                    </li>
+                    {% else %}
+                    <li>
+                      <a class="dropdown-item" href="{% url 'signin' %}"
+                        ><i class="fa fa-sign-in"></i> Signin</a
+                      >
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'signup' %}"
+                        ><i class="fa fa-user-plus"></i> Signup</a
+                      >
+                    </li>
+                    {% endif %}
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% block navbar %}{% endblock %}
+    </div>
+
+    <!-- Right Drawer for Cart -->
+    <div id="cartDrawer" class="cart-drawer">
+      <div class="cart-drawer-content">
+        <div
+          class="cart-drawer-header d-flex justify-content-between align-items-center position-relative"
+        >
+          <h5 class="mb-0">Shopping Cart</h5>
+          <button
+            id="closeDrawerBtn"
+            class="btn-close"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div id="cartItems" class="cart-items">
+          <!-- Cart items will be dynamically populated here -->
+        </div>
+      </div>
+      <hr>
+      <div class="d-flex justify-content-center">
+        <a href="{% url "checkout" %}"
+          id="checkout-btn"
+          class="checkout-btn btn btn-secondary"
+          class="mt-auto"
+        >
+          checkout
+        </a>
+      </div>
+    </div>
+
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+      <div class="toast-container position-fixed top-0 end-0 p-3">
+        {% if messages %} {% for message in messages %}
+        <div
+          class="toast bg-{{ message.tags }}"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          data-bs-delay="2000"
+        >
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button
+              type="button"
+              class="btn-close btn-close-black me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+        </div>
+        {% endfor %} {% endif %}
+      </div>
+    </div>
+
+    {% block content %}{% endblock %} {% block script %}{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+      .checkout-btn {
+        display: none;
+      }
+      .cart-drawer {
+        position: fixed;
+        top: 0;
+        right: -300px; /* Start drawer off-screen */
+        background-color: white;
+        height: 100%;
+        width: 300px;
+        transition: right 0.3s ease;
+        box-shadow: -2px 0px 5px rgba(0, 0, 0, 0.1);
+        z-index: 1051; /* Ensure drawer is above other content */
+      }
+
+      .cart-drawer.open {
+        right: 0; /* Slide drawer into view */
+      }
+
+      .cart-drawer-content {
+        padding: 20px;
+        height: 88vh;
+        overflow-y: auto; /* Enable scrolling for content if it exceeds drawer height */
+      }
+
+      .cart-drawer-header {
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+      }
+
+      .cart-product-image {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .quantity-controls {
+        display: flex;
+      }
+      .product-price{
+         color:grey;
+         font-size:1rem; 
+      }
+    </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const updateCartUI = (productId, product) => {
+          const buttons = document.querySelectorAll(
+            `button[data-product-id="${productId}"]`
+          );
+          const controlsList = document.querySelectorAll(
+            `div.quantity-controls[data-product-id="${productId}"]`
+          );
+
+          if (product?.count > 0) {
+            buttons.forEach((button) => {
+              button.outerHTML = `
+                        <div class="">
+                          <div class=" quantity-controls" data-product-id="${productId}">
+                              <button type="button" class="decrement" style="background-color: #6c757d;border-radius: 6px 0 0 6px;color: white;">-</button>
+                              <input type="text" value="${product.count}" class="quantity-field text-center" style="width:40px; border:2px solid #6c757d;padding:5.3px" readonly>
+                              <button type="button" class="increment" style="background-color: #6c757d;border-radius: 0 6px 6px 0;color: white;">+</button>
+                              <a href="{% url "checkout" %}" class="" style="text-decoration:none;margin-left:10px;background-color: green;border-radius: 6px;color: white; font-size:0.75rem; padding:10px;" >Checkout</a>
+                            </div>
+                        </div>
+                    `;
+            });
+            controlsList.forEach((controls) => {
+              controls.querySelector("input").value = product.count;
+            });
+          } else {
+            controlsList.forEach((controls) => {
+              console.log(product);
+              const productName = product.name;
+              const productPrice = product.price;
+              const productUrl = product.url;
+              const productImage = product.image;
+              controls.outerHTML = `
+                        <button
+                            class="btn btn-dark add-to-cart-btn"
+                            data-product-id="${productId}"
+                            data-product-name="${productName}"
+                            data-product-price="${productPrice}"
+                            data-product-url="${productUrl}"
+                            data-product-image="${productImage}"
+                        >
+                            Add to Cart
+                        </button>
+                    `;
+            });
+          }
+          updateCartCount();
+          updateDrawerUI();
+          updateTotalCount();
+        };
+
+        const updateCartCount = () => {
+          const cart = JSON.parse(localStorage.getItem("cart")) || {};
+          const totalCount = Object.values(cart).reduce(
+            (sum, product) => sum + product.count,
+            0
+          );
+          const cartCountElement = document.getElementById("cartcount");
+          if (cartCountElement) {
+            cartCountElement.innerHTML = totalCount;
+          }
+        };
+
+        const loadCartFromLocalStorage = () => {
+          const cart = JSON.parse(localStorage.getItem("cart")) || {};
+          Object.keys(cart).forEach((productId) => {
+            updateCartUI(productId, cart[productId]);
+          });
+        };
+
+        document.addEventListener("click", function (event) {
+          const cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+          if (event.target.classList.contains("add-to-cart-btn")) {
+            const productId = event.target.dataset.productId;
+            const productName = event.target.dataset.productName;
+            const productPrice = event.target.dataset.productPrice;
+            const productUrl = event.target.dataset.productUrl;
+            const productImage = event.target.dataset.productImage;
+
+            cart[productId] = cart[productId] || {
+              name: productName,
+              price: productPrice,
+              url: productUrl,
+              image: productImage,
+              count: 0,
+            };
+            cart[productId].count += 1;
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            updateCartUI(productId, cart[productId]);
+          }
+
+          if (event.target.classList.contains("increment")) {
+            const productId =
+              event.target.closest(".quantity-controls").dataset.productId;
+            cart[productId].count += 1;
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            updateCartUI(productId, cart[productId]);
+          }
+
+          if (event.target.classList.contains("decrement")) {
+            const productId =
+              event.target.closest(".quantity-controls").dataset.productId;
+            const tempproduct = cart[productId];
+            if (tempproduct.count > 0) {
+              tempproduct.count -= 1;
+            } else {
+              delete cart[productId];
+            }
+            localStorage.setItem("cart", JSON.stringify(cart));
+            updateCartUI(productId, tempproduct);
+          }
+        });
+
+        loadCartFromLocalStorage();
+
+        const openCartDrawer = () => {
+          const cartDrawer = document.getElementById("cartDrawer");
+          cartDrawer.classList.add("open");
+        };
+
+        const closeCartDrawer = () => {
+          const cartDrawer = document.getElementById("cartDrawer");
+          cartDrawer.classList.remove("open");
+        };
+
+        const cartIcon = document.getElementById("cart");
+        cartIcon.addEventListener("click", openCartDrawer);
+
+        const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+        closeDrawerBtn.addEventListener("click", closeCartDrawer);
+
+        function updateDrawerUI() {
+          const cart = JSON.parse(localStorage.getItem("cart")) || {};
+          const cartItemsElement =document.querySelectorAll(".cart-items");
+          let content = "";
+
+          Object.keys(cart).forEach((productId) => {
+            const product = cart[productId];
+
+            let pname = product.name;
+            
+
+            if (product.count > 0) {
+              content += `
+                    <div class="row mb-3">
+                        <a style="text-decoration:none;color:black;" href="${product.url}" class="col-4">
+                            <img src="${product.image}" alt="${product.name}" class="cart-product-image">
+                        </a>
+                        <div class="col-8">
+                            <a style="text-decoration:none;color:black;" href="${product.url}">${pname}</a>
+                            <div class="d-flex justify-content-between mt-2 mb-2">
+                              <div>Quantity: <span class="product-quantity">${product.count}</span></div>
+                              <div class="product-price"><span>$</span>${(product.price * product.count).toFixed(2)}</span></div>
+                            </div>
+                            <div class="quantity-controls" data-product-id="${productId}">
+                                <button class="btn btn-sm btn-secondary rounded-start decrement" style="border-radius:6px 0 0 6px">-</button>
+                                <input type="text" value="${product.count}" class="quantity-field text-center" style="width:40px; border-radius:0px" readonly>
+                                <button class="btn btn-sm btn-secondary increment" style="border-radius:0 6px 6px 0px">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+          });
+          let checkoutbtn = document.getElementById("checkout-btn");
+          if (content.length > 0) {
+            content+=`<input type="hidden" name="products_submit" class="products_submit" value="">`
+            checkoutbtn.style.display = "block";
+          }else{
+            content+=`<div class="row text-center"><div class="empty-cart-message">
+                Your Cart is Empty <br>
+                <a href="#">Explore Products</a>
+              </div></div>`
+            checkoutbtn.style.display = "none";
+          }
+          Array.from(cartItemsElement).forEach(e => {
+            e.innerHTML = content;
+          });
+        }
+      });
+      function updateTotalCount(){
+        const cart = JSON.parse(localStorage.getItem("cart")) || {};
+        const products = Object.keys(cart).map(productId => `${productId} ${cart[productId].count}`).join(',');
+        products_submit = document.querySelectorAll(".products_submit")
+        products_submit.forEach((p) => {
+          p.value = products;
+        });
+
+        let totalAmt=0
+
+        Object.keys(cart).forEach((productId) => {
+          const product = cart[productId];
+          totalAmt+=product.price * product.count;
+        })
+        const totalAmount =document.querySelectorAll(".cart-total-amt");
+        const subTotalAmount =document.querySelectorAll(".cart-subtotal-amt");
+        Array.from(totalAmount).forEach(e => {
+          e.innerHTML = (totalAmt+5).toFixed(2);
+        });
+        Array.from(subTotalAmount).forEach(e => {
+          e.innerHTML = (totalAmt).toFixed(2);
+        });
+
+      }
+    </script>
+  </body>
+</html>
