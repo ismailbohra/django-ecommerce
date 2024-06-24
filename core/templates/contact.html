@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Contact Us
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Let's Connect</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            {{ form.full_name|as_crispy_field }}
+                        </div>
+                        <div class="form-group mb-3">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+                        <div class="form-group mb-3">
+                            {{ form.message|as_crispy_field }}
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

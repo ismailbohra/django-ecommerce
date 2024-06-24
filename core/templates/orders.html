@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %} My Orders {% endblock %} 
+{% block content %}
+
+<div class="container-fluid">
+  <div class="container">
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center py-3">
+      <h2 class="h5 mb-0"><a href="#" class="text-muted"></a> My Orders</h2>
+    </div>
+
+    <!-- Main content -->
+    <div class="row">
+      <div class="col-12">
+        <!-- Details -->
+        <div class="card mb-4">
+          <div class="card-body table-responsive">
+            <table class="table table-borderless ">
+              <thead>
+                <tr>
+                  <th class="text-nowrap">#</th>
+                  <th class="text-nowrap">Created At</th>
+                  <th class="text-nowrap">Card Details</th>
+                  <th class="text-nowrap">Amount</th>
+                  <th class="text-nowrap">Payment Status</th>
+                  <th class="text-nowrap">Status</th>
+                  <th class="text-nowrap">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in orders %}
+                <tr>
+                  <td class="text-nowrap">{{ forloop.counter }}</td>
+                  <td class="text-nowrap">{{ item.created_at }}</td>
+                  <td class="text-nowrap">{{ item.card_type }} -{{ item.card_number|slice:"-4:" }}</td>
+                  <td class="text-nowrap">$ {{ item.order_total }}</td>
+                  <td class="text-nowrap">
+                    {% if item.payment_status == 'Pending' %}
+                      <span class="badge bg-info rounded-pill">{{ item.payment_status }}</span>
+                    {% else %}
+                      <span class="badge bg-success rounded-pill">{{ item.payment_status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-nowrap">
+                    {% if item.status == 'Pending' %}
+                      <span class="badge bg-warning rounded-pill">{{ item.status }}</span>
+                    {% else %}
+                      <span class="badge bg-success rounded-pill">{{ item.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-nowrap">
+                    <a class="btn btn-warning btn-sm text-white" href="{% url 'order_detail' item.id %}">View Details</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

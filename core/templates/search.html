@@ -1,0 +1,219 @@
+{% extends "layout.html" %} {% load static %} {% block title %}
+ {{ category.name}} {%endblock%} {% block navbar %}
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand d-block d-sm-block d-md-none d-lg-none" href="{% url "home" %}"
+      >Ecommerce</a
+    >
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% for category in categories_tree %} {% if category.children %}
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle text-capitalize"
+            href="{%url 'categorywise' category.id%}"
+            id="navbarDropdown_{{ category.id }}"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {{ category.name }}
+          </a>
+          <ul
+            class="dropdown-menu"
+            aria-labelledby="navbarDropdown_{{ category.id }}"
+          >
+            {% for child in category.children %}
+            <li>
+              <a
+                class="dropdown-item text-capitalize"
+                href="{%url 'categorywise' child.id%}"
+                >{{ child.name }}</a
+              >
+            </li>
+            <!-- Add further nested structure if needed -->
+            {% endfor %}
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a
+            class="nav-link text-capitalize"
+            href="{%url 'categorywise' category.id%}"
+            >{{ category.name }}</a
+          >
+        </li>
+        {% endif %} {% endfor %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .product-desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
+{% endblock %} {% block content %}
+
+<!-- Products Grid -->
+<div class="container mb-4 mt-4">
+  <div class="row">
+    {% if flag %}
+    <div class="col-12">
+      <div class="card text-center p-5">
+        <h4>Sorry No Result Found You can Checkout Other products</h4>
+      </div>
+    </div>
+    {% endif %} {% for product in products %}
+    <div class="col-md-4 col-lg-3 col-6">
+      <div class="product-grid2">
+        <div class="product-image2">
+          <a href="{% url 'product_details' product.id %}">
+            {% with images=product.images.all %} {% if images %}
+            <img
+              class="pic-1"
+              src="{{ images.0.image.url }}"
+              alt="{{ product.name }}"
+            />
+            {% if images|length > 1 %}
+            <img
+              class="pic-2"
+              src="{{ images.1.image.url }}"
+              alt="{{ product.name }}"
+            />
+            {% else %}
+            <img
+              class="pic-2"
+              src="{{ images.0.image.url }}"
+              alt="{{ product.name }}"
+            />
+            {% endif %} {% else %}
+            <img
+              class="pic-1"
+              src="{% static 'default-image.jpg' %}"
+              alt="Default image"
+            />
+            {% endif %} {% endwith %}
+          </a>
+          <ul class="social">
+            <li>
+              <a href="#"><i class="fa fa-shopping-bag"></i></a>
+            </li>
+            <li>
+              <a href="#"><i class="fa fa-eye"></i></a>
+            </li>
+          </ul>
+        </div>
+        <div class="product-content">
+          <h3 class="title">
+            <a href="{% url 'product_details' product.id %}"
+              >{{ product.name }}</a
+            >
+          </h3>
+          <span class="price">$ {{ product.price }}</span>
+        </div>
+        <div class="actions d-flex justify-content-center">
+          <button
+            class="btn btn-dark add-to-cart-btn"
+            data-product-id="{{ product.id }}"
+            data-product-name="{{ product.name }}"
+            data-product-price="{{ product.price }}"
+            data-product-image="{{ product.images.all.0.image.url }}"
+            data-product-url="{% url 'product_details' product.id %}"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="row mt-5">
+    {% if not flag %}
+    <div class="col-12 p-5">
+     <h3>Related Products</h3>
+    </div>
+        {% for product in rproducts %}
+        <div class="col-md-4 col-lg-3 col-6">
+          <div class="product-grid2">
+            <div class="product-image2">
+              <a href="{% url 'product_details' product.id %}">
+                {% with images=product.images.all %} {% if images %}
+                <img
+                  class="pic-1"
+                  src="{{ images.0.image.url }}"
+                  alt="{{ product.name }}"
+                />
+                {% if images|length > 1 %}
+                <img
+                  class="pic-2"
+                  src="{{ images.1.image.url }}"
+                  alt="{{ product.name }}"
+                />
+                {% else %}
+                <img
+                  class="pic-2"
+                  src="{{ images.0.image.url }}"
+                  alt="{{ product.name }}"
+                />
+                {% endif %} {% else %}
+                <img
+                  class="pic-1"
+                  src="{% static 'default-image.jpg' %}"
+                  alt="Default image"
+                />
+                {% endif %} {% endwith %}
+              </a>
+              <ul class="social">
+                <li>
+                  <a href="#"><i class="fa fa-shopping-bag"></i></a>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-eye"></i></a>
+                </li>
+              </ul>
+            </div>
+            <div class="product-content">
+              <h3 class="title">
+                <a href="{% url 'product_details' product.id %}"
+                  >{{ product.name }}</a
+                >
+              </h3>
+              <span class="price">$ {{ product.price }}</span>
+            </div>
+            <div class="actions d-flex justify-content-center">
+              <button
+                class="btn btn-dark add-to-cart-btn"
+                data-product-id="{{ product.id }}"
+                data-product-name="{{ product.name }}"
+                data-product-price="{{ product.price }}"
+                data-product-image="{{ product.images.all.0.image.url }}"
+                data-product-url="{% url 'product_details' product.id %}"
+              >
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+  </div>
+</div>
+
+{% endblock %}

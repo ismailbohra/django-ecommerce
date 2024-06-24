@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}
+Product
+{% endblock %}
+
+{% block head %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% endblock %}
+
+
+{% block navbar %}
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a
+      class="navbar-brand d-block d-sm-block d-md-none d-lg-none"
+      href="{% url "home" %}"
+      >Ecommerce</a
+    >
+  </div>
+</nav>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container mb-5">
+    <div class="row mt-2 gy-sm-5 gy-md-2">
+        <div class="col-lg-6">
+            <div class="d-flex flex-column-reverse flex-md-row">
+                <div class="col-md-4 text-center">
+                    <ul class="nav nav-tabs d-flex flex-row flex-md-column text-center pro-details" style="border:none" id="myTab" role="tablist">
+                        {% for image in product.images.all %}
+                            <li class="nav-item m-2">
+                                <img class="img-fluid {% if forloop.first %}active{% endif %} h-100 rounded shadow"
+                                    src="{{ image.image.url }}"
+                                    data-image="{{ image.image.url }}"
+                                    data-toggle="tab"
+                                    role="tab"
+                                    aria-controls="image{{ forloop.counter }}"
+                                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                                    onclick="changeMainImage('{{ image.image.url }}')">
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-8 text-center border-right border-secondary">
+                    <div class="tab-content row h-100 d-flex justify-content-center align-items-center" id="myTabContent">
+                        {% for image in product.images.all %}
+                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %} col-lg-12"
+                                id="image{{ forloop.counter }}"
+                                role="tabpanel"
+                                aria-labelledby="image{{ forloop.counter }}-tab">
+                                <img class="img-fluid main-image rounded"
+                                    src="{{ image.image.url }}"
+                                    alt="Product Image">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% for category in categories %}
+                        <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                            {% if not forloop.last %}
+                                <a href="#">{{ category.name }}</a>
+                            {% else %}
+                                {{ category.name }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            </nav>
+            <h2>{{ product.name }}</h2>
+            <h3>₹{{ product.price }}</h3>
+            <label for="desc">Description</label>
+            <p>{{product.description}}</p>
+            <div class="actions d-flex">
+                <button
+                  class="btn btn-dark add-to-cart-btn"
+                  data-product-id="{{ product.id }}"
+                  data-product-name="{{ product.name }}"
+                  data-product-price="{{ product.price }}"
+                  data-product-image="{{ product.images.all.0.image.url }}"
+                  data-product-url="{% url 'product_details' product.id %}"
+                >
+                  Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12 p-5">
+         <h3>Related Products</h3>
+        </div>
+            {% for product in rproducts %}
+            <div class="col-md-4 col-lg-3 col-6">
+              <div class="product-grid2">
+                <div class="product-image2">
+                  <a href="{% url 'product_details' product.id %}">
+                    {% with images=product.images.all %} {% if images %}
+                    <img
+                      class="pic-1"
+                      src="{{ images.0.image.url }}"
+                      alt="{{ product.name }}"
+                    />
+                    {% if images|length > 1 %}
+                    <img
+                      class="pic-2"
+                      src="{{ images.1.image.url }}"
+                      alt="{{ product.name }}"
+                    />
+                    {% else %}
+                    <img
+                      class="pic-2"
+                      src="{{ images.0.image.url }}"
+                      alt="{{ product.name }}"
+                    />
+                    {% endif %} {% else %}
+                    <img
+                      class="pic-1"
+                      src="{% static 'default-image.jpg' %}"
+                      alt="Default image"
+                    />
+                    {% endif %} {% endwith %}
+                  </a>
+                  <ul class="social">
+                    <li>
+                      <a href="#"><i class="fa fa-shopping-bag"></i></a>
+                    </li>
+                    <li>
+                      <a href="#"><i class="fa fa-eye"></i></a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="product-content">
+                  <h3 class="title">
+                    <a href="{% url 'product_details' product.id %}"
+                      >{{ product.name }}</a
+                    >
+                  </h3>
+                  <span class="price">$ {{ product.price }}</span>
+                </div>
+                <div class="actions d-flex justify-content-center">
+                  <button
+                    class="btn btn-dark add-to-cart-btn"
+                    data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}"
+                    data-product-price="{{ product.price }}"
+                    data-product-image="{{ product.images.all.0.image.url }}"
+                    data-product-url="{% url 'product_details' product.id %}"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+      </div>
+</div>
+
+<script>
+    function changeMainImage(imageUrl) {
+        $('.main-image').attr('src', imageUrl);
+    }
+</script>
+
+<style>
+    .pro-details .nav-item {
+        height: 50px;
+    }
+</style>
+{% endblock %}
