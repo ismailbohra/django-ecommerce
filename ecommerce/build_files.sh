@@ -1,9 +1,6 @@
 #!/bin/bash
-
+hiii
 echo "BUILD START"
-
-# Ensure staticfiles_build directory exists
-mkdir -p staticfiles_build
 
 # Install Python dependencies from requirements.txt
 python3.9 -m pip install -r requirements.txt
